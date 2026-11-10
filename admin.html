@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Admin | DEALZWITHKEYZ</title>
+<style>
+:root{--bg:#fff;--fg:#0a0a0a;--line:#ddd;--card:#f5f5f5;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0a0a;--fg:#fff;--line:#2a2a2a;--card:#161616;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:auto;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif;padding:16px;max-width:1000px}
+input,select,textarea,button{font:inherit;padding:9px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);width:100%}
+button{width:auto;cursor:pointer;font-weight:700;background:var(--fg);color:var(--bg);border-color:var(--fg)}button.o{background:transparent;color:var(--fg)}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}label{font-size:.8rem;font-weight:600;display:grid;gap:3px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}.r b{flex:1;min-width:180px}.r select{width:auto}
+img.t{width:56px;height:40px;object-fit:cover;border-radius:6px}#m{font-weight:700;margin:8px 0;min-height:1.5em}
+</style></head><body>
+<h1>DEALZWITHKEYZ Admin</h1><div id="m"></div><div id="app"></div>
+<script>
+/* PASTE YOUR TWO VALUES HERE (both are safe to be public; never paste a "service_role" key) */
+var SBU="https://gaqjoqqbntzyzyhpbtke.supabase.co",KEY="sb_publishable_2IejoHqbRSLXDG9qoZOjqQ_869noyFE",OWNER="dealzwithkeyz@gmail.com";
+var tok=null,cars=[],ed=null,ph=[];
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function msg(t){$("#m").textContent=t}
+function hd(){var h={apikey:KEY,"Content-Type":"application/json"};if(tok)h.Authorization="Bearer "+tok;else if(KEY.indexOf("sb_")!=0)h.Authorization="Bearer "+KEY;return h}
+function api(p,o){o=o||{};
+ return fetch(SBU+p,{method:o.m||"GET",headers:hd(),body:o.b?JSON.stringify(o.b):undefined})
+ .then(function(r){return r.text().then(function(t){if(!r.ok)throw new Error(t||r.status);return t?JSON.parse(t):null})})}
+function loginView(){
+ $("#app").innerHTML='<form id="lf" class="c"><div class="g"><label>Email<input id="e" type="email" required></label><label>Password<input id="p" type="password" required></label></div><p><button>Log in</button></p></form>';
+ $("#lf").onsubmit=function(ev){ev.preventDefault();msg("Logging in...");
+  fetch(SBU+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify({email:$("#e").value,password:$("#p").value})})
+  .then(function(r){return r.json()}).then(function(d){
+   if(!d.access_token||!d.user||String(d.user.email).toLowerCase()!=OWNER){tok=null;return msg("Login failed or not authorized.")}
+   tok=d.access_token;msg("");load()}).catch(function(){msg("Could not reach the database. Check the two pasted values.")})}}
+function load(){api("/rest/v1/cars?select=*&order=created_at.desc").then(function(r){cars=r;view()}).catch(function(e){msg("Could not load: "+e.message)})}
+function view(){
+ var c=ed?(cars.filter(function(x){return x.id==ed})[0]||{}):{};
+ var rows=cars.map(function(x){return '<div class="r">'+(x.photos&&x.photos[0]?'<img class="t" src="'+esc(x.photos[0])+'" alt="">':'')+'<b>'+esc(x.year)+' '+esc(x.make)+' '+esc(x.model)+' · '+esc(x.price)+' $</b>'+
+  '<select onchange="setSt('+x.id+',this.value)">'+["available","reserved","sold"].map(function(s){return '<option'+(x.status==s?' selected':'')+'>'+s+'</option>'}).join("")+'</select>'+
+  '<button class="o" onclick="startEdit('+x.id+')">Edit</button><button class="o" onclick="del('+x.id+')">Delete</button></div>'}).join("")||"<p>No cars yet. Add your first one below.</p>";
+ function f(id,l,v,t){return '<label>'+l+'<input id="'+id+'" type="'+(t||"text")+'" value="'+esc(v)+'"></label>'}
+ $("#app").innerHTML='<p><button class="o" onclick="tok=null;loginView()">Log out</button></p><div class="c"><h2>Inventory ('+cars.length+')</h2>'+rows+'</div>'+
+ '<form id="cf" class="c"><h2>'+(ed?'Edit car':'Add a car')+'</h2><div class="g">'+f("fy","Year",c.year,"number")+f("fm","Make",c.make)+f("fmo","Model",c.model)+f("ft","Trim",c.trim_level)+f("fk","Mileage (km)",c.mileage,"number")+f("fv","VIN",c.vin)+f("fp","Price ($)",c.price,"number")+
+ '<label>Status<select id="fs">'+["available","reserved","sold"].map(function(s){return '<option'+((c.status||"available")==s?' selected':'')+'>'+s+'</option>'}).join("")+'</select></label>'+f("fdl","Dealership (leave empty if not sold through one)",c.dealership)+'</div>'+
+ '<label>Description<textarea id="fd" rows="3">'+esc(c.description)+'</textarea></label>'+
+ '<p>'+ph.map(function(u,i){return '<img class="t" src="'+esc(u)+'" alt=""><button type="button" class="o" onclick="rmPh('+i+')">✕</button> '}).join("")+'</p>'+
+ '<label>Add photos<input id="ff" type="file" accept="image/*" multiple></label><p><button>'+(ed?'Save changes':'Add car')+'</button> '+(ed?'<button type="button" class="o" onclick="ed=null;ph=[];view()">Cancel</button>':'')+'</p></form>';
+ $("#cf").onsubmit=save}
+function startEdit(id){ed=id;ph=(cars.filter(function(x){return x.id==id})[0].photos||[]).slice();view();scrollTo(0,document.body.scrollHeight)}
+function rmPh(i){ph.splice(i,1);view()}
+function up(files){return Promise.all([].map.call(files,function(f){var p=Date.now()+"-"+f.name.replace(/[^\w.]/g,"_");
+ return fetch(SBU+"/storage/v1/object/cars/"+p,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+tok,"Content-Type":f.type},body:f})
+ .then(function(r){if(!r.ok)throw new Error("Photo upload failed");return SBU+"/storage/v1/object/public/cars/"+p})}))}
+function save(ev){ev.preventDefault();msg("Saving...");var files=$("#ff").files;
+ (files.length?up(files):Promise.resolve([])).then(function(urls){
+  var row={year:+$("#fy").value,make:$("#fm").value.trim(),model:$("#fmo").value.trim(),trim_level:$("#ft").value.trim()||null,mileage:+$("#fk").value||0,vin:$("#fv").value.trim()||null,price:+$("#fp").value,status:$("#fs").value,description:$("#fd").value.trim()||null,dealership:$("#fdl").value.trim()||null,photos:ph.concat(urls)};
+  if(ed){var old=cars.filter(function(x){return x.id==ed})[0];
+   if(old&&+old.price!==row.price&&!confirm("Change the price from "+old.price+" $ to "+row.price+" $?")){msg("Cancelled");return}
+   return api("/rest/v1/cars?id=eq."+ed,{m:"PATCH",b:row})}
+  return api("/rest/v1/cars",{m:"POST",b:row})})
+ .then(function(){ed=null;ph=[];msg("Saved. The public website is updated.");load()}).catch(function(e){msg("Error: "+e.message)})}
+function setSt(id,s){if(s=="sold"&&!confirm("Mark this car as sold?"))return load();api("/rest/v1/cars?id=eq."+id,{m:"PATCH",b:{status:s}}).then(function(){msg("Status updated.");load()}).catch(function(e){msg("Error: "+e.message)})}
+function del(id){if(!confirm("Delete this car permanently? This cannot be undone."))return;api("/rest/v1/cars?id=eq."+id,{m:"DELETE"}).then(function(){msg("Deleted.");load()}).catch(function(e){msg("Error: "+e.message)})}
+if(SBU.indexOf("PASTE")==0||KEY.indexOf("PASTE")==0){$("#app").innerHTML='<div class="c">Setup not finished: the two values at the top of this file are still the placeholders.</div>'}else loginView();
+</script></body></html>

@@ -152,7 +152,7 @@ footer{padding:48px 20px 100px}
 <div id="f-fin"></div></section>
 
 <section class="page" id="book"><h1 data-fr="Prendre rendez-vous">Book an Appointment</h1>
-<div class="note" data-fr="Heure de Montréal (HE). Ceci est une DEMANDE : votre rendez-vous n’est confirmé que lorsque nous vous répondons par courriel.">Montréal time (ET). This is a REQUEST: your appointment is only confirmed when we reply by email.</div>
+<div class="note" data-fr="Heure de l’Est (HE). Ceci est une DEMANDE : votre rendez-vous n’est confirmé que lorsque nous vous répondons par courriel.">Eastern Time (ET). This is a REQUEST: your appointment is only confirmed when we reply by email.</div>
 <h2 data-fr="1. Choisissez une date">1. Choose a date</h2><div class="days" id="days"></div>
 <h2 data-fr="2. Choisissez une heure">2. Choose a time</h2><div class="slots" id="slots"></div>
 <div id="f-book"></div></section>
@@ -169,7 +169,7 @@ footer{padding:48px 20px 100px}
 <div><b class="fw">DEALZWITHKEYZ</b><p>Montréal, Québec, Canada</p><a href="mailto:dealzwithkeyz@gmail.com">dealzwithkeyz@gmail.com</a><a href="#contact" data-fr="Demander un rappel">Request a callback</a><p id="fp"></p></div>
 <div><h4 data-fr="Explorer">Explore</h4>
 <a href="#cars" data-fr="Voitures à vendre">Cars for Sale</a><a href="#sell" data-fr="Vendre ma voiture">Sell My Car</a><a href="#trade" data-fr="Échanger ma voiture">Trade My Car</a><a href="#financing" data-fr="Financer une voiture">Finance a Car</a><a href="#lease" data-fr="Louer à long terme">Lease a Car</a><a href="#wholesale" data-fr="Vente en gros">Wholesale</a><a href="#book" data-fr="Prendre rendez-vous">Book an Appointment</a><a href="#contact" data-fr="Parler à un représentant">Speak to a Representative</a></div>
-<div><h4 data-fr="Heures de rendez-vous (heure de Montréal)">Appointment hours (Montréal time)</h4><p id="fh"></p></div></div>
+<div><h4 data-fr="Heures de rendez-vous (heure de l’Est)">Appointment hours (Eastern Time)</h4><p id="fh"></p></div></div>
 <div class="fb"><p class="fd" data-fr="Certains véhicules peuvent être vendus par l’entremise de concessionnaires partenaires, comme indiqué sur chaque annonce. Le financement et la location à long terme sont sous réserve de l’approbation de crédit. Les demandes de rendez-vous ne sont pas confirmées avant notre réponse. Le gros se fait sur demande seulement.">Vehicles may be sold through partner dealerships, as indicated on each listing. Financing and leasing are subject to credit approval. Appointment requests are not confirmed until we reply. Wholesale is by application only.</p>
 <p class="fd" style="opacity:.85;margin:0">© <span id="yr"></span> DEALZWITHKEYZ · Montréal, Québec</p></div></footer>
 
@@ -203,6 +203,9 @@ function t(a,b){return L=="fr"?b:a}
 var money=function(n){return L=="fr"?n.toLocaleString("fr-CA")+" $":"$"+n.toLocaleString("en-CA")};
 var km=function(n){return n.toLocaleString(L=="fr"?"fr-CA":"en-CA")+" km"};
 function inq(c){return "mailto:"+EMAIL+"?subject="+encodeURIComponent("Inquiry: "+c.y+" "+c.mk+" "+c.md)+"&body="+encodeURIComponent("Vehicle: "+c.y+" "+c.mk+" "+c.md+" (ID "+c.id+")\nListed price: "+c.p+" $"+(c.dl?"\nSold through dealership: "+c.dl:"")+"\n\nName:\nPhone:\nMessage:\n")}
+function esc(x){return String(x==null?"":x).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function stl(x){return x=="Sold"?t("Sold","Vendu"):x=="Reserved"?t("Reserved","Réservé"):t("Available","Disponible")}
+function pic(c){return c.ph&&c.ph[0]?'<div class="ph"><img src="'+esc(c.ph[0])+'" alt="" style="width:100%;height:100%;object-fit:cover"></div>':'<div class="ph">'+ICON+'</div>'}
 var ICON='<svg viewBox="0 0 120 60"><path d="M10 40h100M18 40l8-18c2-4 5-6 9-6h50c4 0 7 2 9 5l9 19"/><circle cx="34" cy="42" r="7"/><circle cx="86" cy="42" r="7"/></svg>';
 var avail=CARS.filter(function(c){return c.st=="Available"&&c.ty!="Wholesale"});
 
@@ -247,7 +250,7 @@ document.addEventListener("submit",function(e){
  var f=e.target;if(!f.dataset.s)return;e.preventDefault();
  var body=[],sel=f.dataset.s.indexOf("APPOINTMENT")==0;
  if(sel){if(!pick){var o=f.querySelector(".ok");o.hidden=false;o.textContent=t("Please choose a date and time first.","Veuillez d’abord choisir une date et une heure.");return}
-  body.push("Requested slot (Montréal time): "+pick.d+" "+pick.t)}
+  body.push("Requested slot (Eastern Time): "+pick.d+" "+pick.t)}
  new FormData(f).forEach(function(v,k){body.push(k+": "+v)});body.push("Site language: "+L);
  var o=f.querySelector(".ok");o.hidden=false;
  o.textContent=t("Your email is ready. Press SEND in your email app. We have received nothing until you do, and "+(sel?"your appointment is NOT confirmed until we reply.":"we will reply as soon as we can."),"Votre courriel est prêt. Appuyez sur ENVOYER dans votre application courriel. Nous n’avons rien reçu avant cela"+(sel?", et votre rendez-vous n’est PAS confirmé avant notre réponse.":"."));
@@ -257,7 +260,7 @@ document.addEventListener("submit",function(e){
 /* ---- inventory ---- */
 function card(c){
  var s=c.st!="Available",mail=inq(c);
- return '<div class="card'+(s?" sold":"")+'" data-id="'+c.id+'" style="cursor:pointer"><div class="ph">'+ICON+'</div><div class="b"><span class="tag">'+t(c.ty,c.ty=="Retail"?"Détail":"Gros")+"</span>"+(s?'<span class="tag">'+t("Sold","Vendu")+"</span>":"")+(c.dl?'<span class="tag">'+t("Via dealership","Via concessionnaire")+"</span>":"")+"<h3>"+c.y+" "+c.mk+" "+c.md+'</h3><div class="price">'+money(c.p)+'</div><div style="color:var(--mut);font-size:.88rem">'+km(c.km)+'</div><p><a class="btn s" href="'+mail+'">'+t("Inquire","Demander")+"</a></p></div></div>";
+ return '<div class="card'+(s?" sold":"")+'" data-id="'+c.id+'" style="cursor:pointer">'+pic(c)+'<div class="b"><span class="tag">'+t(c.ty,c.ty=="Retail"?"Détail":"Gros")+"</span>"+(s?'<span class="tag">'+stl(c.st)+"</span>":"")+(c.dl?'<span class="tag">'+t("Via dealership","Via concessionnaire")+"</span>":"")+"<h3>"+c.y+" "+c.mk+" "+c.md+'</h3><div class="price">'+money(c.p)+'</div><div style="color:var(--mut);font-size:.88rem">'+km(c.km)+'</div><p><a class="btn s" href="'+mail+'">'+t("Inquire","Demander")+"</a></p></div></div>";
 }
 function render(){
  var q=$("#q").value.toLowerCase(),s=$("#so").value;
@@ -270,7 +273,7 @@ function render(){
 document.addEventListener("click",function(e){
  if(e.target.closest("a"))return;var el=e.target.closest("[data-id]");if(!el)return;
  var c=CARS.filter(function(x){return x.id==el.dataset.id})[0];
- $("#dlg").innerHTML='<div class="ph" style="border-radius:8px">'+ICON+"</div><h2>"+c.y+" "+c.mk+" "+c.md+'</h2><div class="price">'+money(c.p)+"</div><p>"+km(c.km)+" · "+t(c.tr,"Automatique")+" · "+t(c.fu,"Essence")+" · "+t(c.ty,c.ty=="Retail"?"Détail":"Gros")+" · "+t(c.st,c.st=="Sold"?"Vendu":"Disponible")+"</p><p>"+c.d+'</p>'+(c.dl?'<div class="note">'+t("This vehicle is sold through a partner dealership: ","Ce véhicule est vendu par l’entremise d’un concessionnaire partenaire : ")+"<b>"+c.dl+"</b>. "+t("Price and availability are confirmed with the dealership before any sale.","Le prix et la disponibilité sont confirmés avec le concessionnaire avant toute vente.")+"</div>":"")+'<p><a class="btn" href="'+inq(c)+'">'+t("Inquire by email","Demander par courriel")+'</a> <a class="btn o" href="#financing" onclick="$(\'#dlg\').close()">'+t("Finance","Financer")+'</a> <button class="btn o" onclick="$(\'#dlg\').close()">'+t("Close","Fermer")+"</button></p>";
+ $("#dlg").innerHTML=pic(c)+(c.ph||[]).slice(1).map(function(u){return '<img src="'+esc(u)+'" alt="" style="width:100%;border-radius:8px;margin-top:8px">'}).join("")+"<h2>"+c.y+" "+c.mk+" "+c.md+'</h2><div class="price">'+money(c.p)+"</div><p>"+km(c.km)+(c.tr?" · "+esc(c.tr):"")+(c.vin?" · VIN "+esc(c.vin):"")+" · "+stl(c.st)+"</p><p>"+c.d+'</p>'+(c.dl?'<div class="note">'+t("This vehicle is sold through a partner dealership: ","Ce véhicule est vendu par l’entremise d’un concessionnaire partenaire : ")+"<b>"+c.dl+"</b>. "+t("Price and availability are confirmed with the dealership before any sale.","Le prix et la disponibilité sont confirmés avec le concessionnaire avant toute vente.")+"</div>":"")+'<p><a class="btn" href="'+inq(c)+'">'+t("Inquire by email","Demander par courriel")+'</a> <a class="btn o" href="#financing" onclick="$(\'#dlg\').close()">'+t("Finance","Financer")+'</a> <button class="btn o" onclick="$(\'#dlg\').close()">'+t("Close","Fermer")+"</button></p>";
  $("#dlg").showModal();
 });
 
@@ -342,7 +345,20 @@ function route(){
  document.querySelectorAll("#nav a").forEach(function(a){a.classList.toggle("on",a.getAttribute("href")=="#"+h)});scrollTo(0,0)}
 addEventListener("hashchange",route);
 $("#yr").textContent=new Date().getFullYear();
-route();applyLang();
+/* ---- live inventory from the free database (set up in Stage 2b) ---- */
+var SB_URL="https://gaqjoqqbntzyzyhpbtke.supabase.co",SB_KEY="sb_publishable_2IejoHqbRSLXDG9qoZOjqQ_869noyFE";
+function loadCars(){
+ if(SB_URL.indexOf("PASTE")==0||SB_KEY.indexOf("PASTE")==0)return;            // not set up yet: keep demo cars
+ CARS=[];SAMPLE=false;avail=[];
+ fetch(SB_URL+"/rest/v1/cars?select=*&order=created_at.desc",{headers:SB_KEY.indexOf("sb_")==0?{apikey:SB_KEY}:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}})
+ .then(function(r){return r.json()}).then(function(rows){
+  if(!Array.isArray(rows))return;
+  CARS=rows.map(function(r){return{id:r.id,y:r.year,mk:r.make,md:r.model,tr:r.trim_level||"",p:+r.price,km:r.mileage||0,vin:r.vin||"",d:r.description||"",st:r.status=="sold"?"Sold":r.status=="reserved"?"Reserved":"Available",ty:"Retail",dl:r.dealership||"",ph:r.photos||[]}});
+  avail=CARS.filter(function(c){return c.st=="Available"});
+  document.querySelectorAll('#f-fin select[name="Vehicle"],#f-lease select[name="Vehicle"]').forEach(function(sel){
+   sel.innerHTML=avail.map(function(c){return "<option>"+esc(c.y+" "+c.mk+" "+c.md)+"</option>"}).join("")+'<option value="Other / not sure" data-fr="Autre / incertain">Other / not sure</option>'});
+  applyLang()}).catch(function(){})}
+route();applyLang();loadCars();
 </script>
 </body>
 </html>
