@@ -12,7 +12,7 @@ button{width:auto;cursor:pointer;font-weight:700;background:var(--fg);color:var(
 .r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}.r b{flex:1;min-width:180px}.r select{width:auto}
 img.t{width:56px;height:40px;object-fit:cover;border-radius:6px}#m{font-weight:700;margin:8px 0;min-height:1.5em}
 </style></head><body>
-<h1>DEALZWITHKEYZ Admin</h1><div id="m"></div><div id="app"></div>
+<h1>DEALZWITHKEYZ Admin</h1><p style="font-size:.75rem;opacity:.6;margin:0">Dashboard version 5</p><div id="m"></div><div id="app"></div>
 <script>
 /* PASTE YOUR TWO VALUES HERE (both are safe to be public; never paste a "service_role" key) */
 var SBU="https://gaqjoqqbntzyzyhpbtke.supabase.co",KEY="sb_publishable_2IejoHqbRSLXDG9qoZOjqQ_869noyFE",OWNER="dealzwithkeyz@gmail.com";
@@ -21,6 +21,7 @@ var MM={};"Acura:ILX,MDX,RDX,TLX,TSX,RSX,ZDX;Audi:A3,A4,A5,A6,Q3,Q5,Q7,Q8,TT;BMW
 var TRIMS="Base,S,SE,SEL,SL,SV,LE,XLE,LX,EX,EX-L,Sport,Touring,Limited,Premium,Luxury,Platinum,SXT,GT,R/T,XLT,Lariat,Titanium,Denali,SLT,LT,LTZ,RS,Trend,Comfortline,Highline".split(",");
 function opts(a){return a.map(function(m){return '<option value="'+esc(m)+'">'}).join("")}
 function DL(){return '<datalist id="mkl">'+opts(Object.keys(MM))+'</datalist><datalist id="mdl"></datalist><datalist id="trl">'+opts(TRIMS)+"</datalist>"}
+function yrSel(v){var cy=new Date().getFullYear()+1;v=+v||new Date().getFullYear()-1+1;var h="";for(var y=Math.max(cy,v);y>=Math.min(1980,v);y--)h+="<option"+(y==v?" selected":"")+">"+y+"</option>";return '<label>Year<select id="fy">'+h+"</select></label>"}
 function fillMd(){var v=($("#fm").value||"").trim().toLowerCase(),k=Object.keys(MM).filter(function(m){return m.toLowerCase()==v})[0];$("#mdl").innerHTML=opts(k?MM[k]:[])}
 var $=function(s){return document.querySelector(s)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -44,7 +45,7 @@ function view(){
   '<button class="o" onclick="startEdit('+x.id+')">Edit</button><button class="o" onclick="del('+x.id+')">Delete</button></div>'}).join("")||"<p>No cars yet. Add your first one below.</p>";
  function f(id,l,v,t,ls){return '<label>'+l+'<input id="'+id+'" type="'+(t||"text")+'" value="'+esc(v)+'"'+(ls?' list="'+ls+'" autocomplete="off"':'')+'></label>'}
  $("#app").innerHTML='<p><button class="o" onclick="tok=null;loginView()">Log out</button></p><div class="c"><h2>Inventory ('+cars.length+')</h2>'+rows+'</div>'+
- '<form id="cf" class="c"><h2>'+(ed?'Edit car':'Add a car')+'</h2><div class="g">'+f("fy","Year",c.year,"number")+f("fm","Make",c.make,"text","mkl")+f("fmo","Model",c.model,"text","mdl")+f("ft","Trim",c.trim_level,"text","trl")+DL()+f("fk","Mileage (km)",c.mileage,"number")+f("fv","VIN",c.vin)+f("fp","Price ($)",c.price,"number")+
+ '<form id="cf" class="c"><h2>'+(ed?'Edit car':'Add a car')+'</h2><div class="g">'+yrSel(c.year)+f("fm","Make",c.make,"text","mkl")+f("fmo","Model",c.model,"text","mdl")+f("ft","Trim",c.trim_level,"text","trl")+DL()+f("fk","Mileage (km)",c.mileage,"number")+f("fv","VIN",c.vin)+f("fp","Price ($)",c.price,"number")+
  '<label>Status<select id="fs">'+["available","reserved","sold"].map(function(s){return '<option'+((c.status||"available")==s?' selected':'')+'>'+s+'</option>'}).join("")+'</select></label>'+f("fdl","Dealership (leave empty if not sold through one)",c.dealership)+'</div>'+
  '<label>Description<textarea id="fd" rows="3">'+esc(c.description)+'</textarea></label>'+
  '<p>'+ph.map(function(u,i){return '<img class="t" src="'+esc(u)+'" alt=""><button type="button" class="o" onclick="rmPh('+i+')">✕</button> '}).join("")+'</p>'+

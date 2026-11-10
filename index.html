@@ -130,7 +130,7 @@ footer{padding:48px 20px 100px}
 <h1 data-fr="Voitures à vendre">Cars for Sale</h1>
 <div class="note" id="samp" data-fr="Annonces d’exemple pour la démonstration. Le vrai inventaire sera ajouté par le propriétaire.">Demo listings for layout. The owner will add the real inventory.</div>
 <div class="note" data-fr="Certains véhicules sont vendus par l’entremise de concessionnaires partenaires; c’est indiqué sur chaque annonce. Pour ceux-là, le prix et la disponibilité sont confirmés avec le concessionnaire avant toute vente.">Some vehicles are sold through partner dealerships; this is shown on each listing. For those, price and availability are confirmed with the dealership before any sale.</div>
-<div class="tools"><input id="q" list="sg" autocomplete="off" placeholder="Search / Rechercher"><select id="fmk"></select><select id="fmd"></select><datalist id="sg"></datalist><select id="so"><option value="new" data-fr="Plus récent">Newest</option><option value="lo" data-fr="Prix croissant">Price: low to high</option><option value="hi" data-fr="Prix décroissant">Price: high to low</option></select></div>
+<div class="tools"><input id="q" list="sg" autocomplete="off" placeholder="Search / Rechercher"><select id="fyr"></select><select id="fmk"></select><select id="fmd"></select><select id="ftr"></select><datalist id="sg"></datalist><select id="so"><option value="new" data-fr="Plus récent">Newest</option><option value="lo" data-fr="Prix croissant">Price: low to high</option><option value="hi" data-fr="Prix décroissant">Price: high to low</option></select></div>
 <div class="grid" id="list"></div>
 <div class="note"><b data-fr="Acheteur en gros ?">Wholesale buyer?</b> <span data-fr="Le gros se fait sur demande seulement.">Wholesale is by application only.</span> <a href="#wholesale" data-fr="Faire une demande">Apply here</a> · <a href="mailto:dealzwithkeyz@gmail.com?subject=Wholesale%20inquiry" data-fr="ou écrivez-nous">or email us</a></div>
 </section>
@@ -165,6 +165,7 @@ footer{padding:48px 20px 100px}
 </main>
 
 <dialog id="dlg"></dialog>
+<datalist id="mkl"></datalist><datalist id="mdl"></datalist><datalist id="trl"></datalist>
 <footer><div class="fg">
 <div><b class="fw">DEALZWITHKEYZ</b><p>Montréal, Québec, Canada</p><a href="mailto:dealzwithkeyz@gmail.com">dealzwithkeyz@gmail.com</a><a href="#contact" data-fr="Demander un rappel">Request a callback</a><p id="fp"></p></div>
 <div><h4 data-fr="Explorer">Explore</h4>
@@ -239,7 +240,8 @@ function field(f){
  var n=f[0],ty=f[2],r=f[3]?" required":"";
  if(ty=="chk")return '<label class="ck"><input type="checkbox" name="'+n+'" required><span data-fr="'+f[1]+'">'+n+'</span></label>';
  var c;
- if(Array.isArray(ty))c="<select name=\""+n+"\">"+ty.map(function(o){var p=o.split("~");return '<option value="'+p[0]+'" data-fr="'+(p[1]||p[0])+'">'+p[0]+"</option>"}).join("")+"</select>";
+ if(Array.isArray(ty))c="<select name=\""+n+"\""+r+">"+(f[3]?'<option value="" data-fr="Choisir">Select</option>':"")+ty.map(function(o){var p=o.split("~");return '<option value="'+p[0]+'" data-fr="'+(p[1]||p[0])+'">'+p[0]+"</option>"}).join("")+"</select>";
+ else if(typeof ty=="string"&&ty.indexOf("dl:")==0)c='<input name="'+n+'" list="'+ty.slice(3)+'" autocomplete="off"'+r+">";
  else if(ty=="area")c='<textarea name="'+n+'" rows="3"'+r+"></textarea>";
  else c='<input name="'+n+'" type="'+(ty||"text")+'"'+r+">";
  return '<label><span data-fr="'+f[1]+(f[3]?" *":"")+'">'+n+(f[3]?" *":"")+"</span>"+c+"</label>";
@@ -249,7 +251,8 @@ function mkForm(el,subj,btn,fields,note){
 }
 var ID=[["Name","Nom","",1],["Email","Courriel","email",1],["Phone","Téléphone","tel",1]];
 var PH=["Photos cannot be attached on this free version. After you send this, reply to our email with your photos attached.","Les photos ne peuvent pas être jointes dans cette version gratuite. Après l’envoi, répondez à notre courriel avec vos photos en pièces jointes."];
-var CAR4=[["Year","Année","number",1],["Make","Marque","",1],["Model","Modèle","",1],["Mileage (km)","Kilométrage (km)","number",1]];
+var YRS=[];for(var yy=new Date().getFullYear()+1;yy>=1990;yy--)YRS.push(""+yy);
+var CAR4=[["Year","Année",YRS,1],["Make","Marque","dl:mkl",1],["Model","Modèle","dl:mdl",1],["Trim (optional)","Version (facultatif)","dl:trl"],["Mileage (km)","Kilométrage (km)","number",1]];
 mkForm("#f-trade","TRADE-IN",["Send trade-in request","Envoyer la demande d’échange"],CAR4.concat([["Condition","État",["Excellent~Excellent","Good~Bon","Fair~Passable","Needs work~À réparer"]],["Loan balance (optional)","Solde du prêt (facultatif)","number"],["Vehicle you want (optional)","Véhicule souhaité (facultatif)"]],ID),PH);
 mkForm("#f-sell","SELL MY CAR",["Request an offer","Demander une offre"],CAR4.concat([["Asking price ($)","Prix demandé ($)","number"],["Details","Détails","area"]],ID),PH);
 mkForm("#f-fin","FINANCING APPLICATION",["Submit financing request","Envoyer la demande de financement"],[["Vehicle","Véhicule",avail.map(function(c){return c.y+" "+c.mk+" "+c.md}).concat(["Other / not sure~Autre / incertain"])],["Monthly budget ($)","Budget mensuel ($)","number"],["Down payment ($, optional)","Mise de fonds ($, facultatif)","number"]].concat(ID,[["I consent to a credit check being initiated by an authorized financing provider. I understand approval is not guaranteed.","Je consens à ce qu’une vérification de crédit soit lancée par un prêteur autorisé. Je comprends que l’approbation n’est pas garantie.","chk"]]),["Never email your SIN or banking details. If needed, they are collected later through the authorized provider.","N’envoyez jamais votre NAS ni vos données bancaires par courriel. Au besoin, elles seront recueillies plus tard par le prêteur autorisé."]);
@@ -276,23 +279,31 @@ function card(c){
  return '<div class="card'+(s?" sold":"")+'" data-id="'+c.id+'" style="cursor:pointer">'+pic(c)+'<div class="b"><span class="tag">'+t(c.ty,c.ty=="Retail"?"Détail":"Gros")+"</span>"+(s?'<span class="tag">'+stl(c.st)+"</span>":"")+(c.dl?'<span class="tag">'+t("Via dealership","Via concessionnaire")+"</span>":"")+"<h3>"+c.y+" "+c.mk+" "+c.md+'</h3><div class="price">'+money(c.p)+'</div><div style="color:var(--mut);font-size:.88rem">'+km(c.km)+'</div><p><a class="btn s" href="'+mail+'">'+t("Inquire","Demander")+"</a></p></div></div>";
 }
 function uniq(a){return a.filter(function(v,i){return a.indexOf(v)==i}).sort()}
-function facets(){ // make/model lists come ONLY from cars actually in the inventory
- var cs=CARS.filter(function(c){return c.ty!="Wholesale"}),mk=$("#fmk").value,mo=$("#fmd").value;
+function facets(){ // choices come ONLY from cars actually in the inventory
+ var cs=CARS.filter(function(c){return c.ty!="Wholesale"}),mk=$("#fmk").value,mo=$("#fmd").value,yr=$("#fyr").value,tr=$("#ftr").value;
  var mks=uniq(cs.map(function(c){return c.mk}));if(mks.indexOf(mk)<0)mk="";
- var mos=uniq(cs.filter(function(c){return !mk||c.mk==mk}).map(function(c){return c.md}));if(mos.indexOf(mo)<0)mo="";
+ var cm=cs.filter(function(c){return !mk||c.mk==mk});
+ var mos=uniq(cm.map(function(c){return c.md}));if(mos.indexOf(mo)<0)mo="";
+ var cy=cm.filter(function(c){return !mo||c.md==mo});
+ var yrs=uniq(cy.map(function(c){return ""+c.y})).reverse();if(yrs.indexOf(yr)<0)yr="";
+ var trs=uniq(cy.map(function(c){return c.tr}).filter(Boolean));if(trs.indexOf(tr)<0)tr="";
  var o=function(a,all){return '<option value="">'+all+"</option>"+a.map(function(x){return "<option>"+esc(x)+"</option>"}).join("")};
+ $("#fyr").innerHTML=o(yrs,t("All years","Toutes les années"));$("#fyr").value=yr;
  $("#fmk").innerHTML=o(mks,t("All makes","Toutes les marques"));$("#fmk").value=mk;
  $("#fmd").innerHTML=o(mos,t("All models","Tous les modèles"));$("#fmd").value=mo;
+ $("#ftr").innerHTML=o(trs,t("All trims","Toutes les versions"));$("#ftr").value=tr;
  $("#sg").innerHTML=uniq(mks.concat(cs.map(function(c){return c.mk+" "+c.md}))).map(function(x){return '<option value="'+esc(x)+'">'}).join("")}
 function render(){
- facets();var q=$("#q").value.toLowerCase(),s=$("#so").value,fk=$("#fmk").value,fo=$("#fmd").value;
- var r=CARS.filter(function(c){return (c.mk+" "+c.md).toLowerCase().indexOf(q)>-1&&c.ty!="Wholesale"&&(!fk||c.mk==fk)&&(!fo||c.md==fo)});
+ facets();var q=$("#q").value.toLowerCase(),s=$("#so").value,fk=$("#fmk").value,fo=$("#fmd").value,fy=$("#fyr").value,ft=$("#ftr").value;
+ var r=CARS.filter(function(c){return (c.mk+" "+c.md).toLowerCase().indexOf(q)>-1&&c.ty!="Wholesale"&&(!fk||c.mk==fk)&&(!fo||c.md==fo)&&(!fy||c.y==fy)&&(!ft||c.tr==ft)});
  r.sort(function(a,b){return s=="lo"?a.p-b.p:s=="hi"?b.p-a.p:b.y-a.y});
- $("#list").innerHTML=r.length?r.map(card).join(""):"<p>"+t("No matches.","Aucun résultat.")+"</p>";
+ $("#list").innerHTML=r.length?r.map(card).join(""):"<p>"+(CARS.length?t("No matches.","Aucun résultat."):t("No vehicles are listed right now. Contact us or check back soon.","Aucun véhicule n’est affiché pour le moment. Contactez-nous ou revenez bientôt."))+"</p>";
  $("#q").placeholder=t("Search make or model","Rechercher marque ou modèle");
 }
 ["#q","#so"].forEach(function(s){$(s).addEventListener("input",render)});
-$("#fmk").addEventListener("change",function(){$("#fmd").value="";render()});$("#fmd").addEventListener("change",render);
+$("#fmk").addEventListener("change",function(){$("#fmd").value="";$("#fyr").value="";$("#ftr").value="";render()});
+$("#fmd").addEventListener("change",function(){$("#fyr").value="";$("#ftr").value="";render()});
+$("#fyr").addEventListener("change",render);$("#ftr").addEventListener("change",render);
 document.addEventListener("click",function(e){
  if(e.target.closest("a"))return;var el=e.target.closest("[data-id]");if(!el)return;
  var c=CARS.filter(function(x){return x.id==el.dataset.id})[0];
@@ -369,6 +380,11 @@ function route(){
  document.querySelectorAll("#nav a").forEach(function(a){a.classList.toggle("on",a.getAttribute("href")=="#"+h)});scrollTo(0,0)}
 addEventListener("hashchange",route);
 $("#yr").textContent=new Date().getFullYear();
+/* ---- make / model / trim choices for the sell and trade forms ---- */
+var MM={};"Acura:ILX,MDX,RDX,TLX,TSX,RSX,ZDX;Audi:A3,A4,A5,A6,Q3,Q5,Q7,Q8,TT;BMW:1 Series,2 Series,3 Series,4 Series,5 Series,7 Series,X1,X3,X5,X6,Z4;Buick:Enclave,Encore,Envision,LaCrosse,Regal;Cadillac:ATS,CTS,Escalade,SRX,XT5;Chevrolet:Aveo,Camaro,Cruze,Equinox,Impala,Malibu,Silverado,Sonic,Spark,Suburban,Tahoe,Traverse,Trax;Chrysler:200,300,Pacifica,Town & Country;Dodge:Caliber,Challenger,Charger,Dart,Durango,Grand Caravan,Journey;Fiat:500;Ford:Edge,Escape,Explorer,F-150,F-250,Fiesta,Flex,Focus,Fusion,Mustang,Ranger,Transit;GMC:Acadia,Canyon,Sierra,Terrain,Yukon;Honda:Accord,Civic,CR-V,Fit,HR-V,Odyssey,Pilot,Ridgeline;Hyundai:Accent,Elantra,Ioniq,Kona,Santa Fe,Sonata,Tucson,Veloster;Infiniti:Q50,Q60,QX50,QX60,QX80;Jeep:Cherokee,Compass,Grand Cherokee,Patriot,Renegade,Wrangler;Kia:Forte,Optima,Rio,Sedona,Seltos,Sorento,Soul,Sportage,Telluride;Land Rover:Discovery,Range Rover,Range Rover Evoque,Range Rover Sport;Lexus:ES,GS,IS,NX,RX;Lincoln:MKC,MKX,MKZ,Navigator;Mazda:CX-3,CX-5,CX-9,Mazda3,Mazda5,Mazda6,MX-5;Mercedes-Benz:A-Class,C-Class,CLA,E-Class,GLA,GLC,GLE,M-Class,S-Class;Mini:Clubman,Cooper,Countryman;Mitsubishi:ASX,Lancer,Mirage,Outlander,RVR;Nissan:Altima,Frontier,Juke,Kicks,Leaf,Maxima,Murano,Pathfinder,Qashqai,Rogue,Sentra,Titan,Versa;Pontiac:G6,Vibe;Porsche:911,Boxster,Cayenne,Macan;Ram:1500,2500,ProMaster;Subaru:Ascent,Crosstrek,Forester,Impreza,Legacy,Outback,WRX;Suzuki:Grand Vitara,SX4,Swift;Tesla:Model 3,Model S,Model X,Model Y;Toyota:4Runner,Avalon,Camry,Corolla,Highlander,Matrix,Prius,RAV4,Sienna,Tacoma,Tundra,Venza,Yaris;Volkswagen:Atlas,Golf,GTI,Jetta,Passat,Tiguan;Volvo:S60,S90,V60,XC40,XC60,XC90".split(";").forEach(function(x){var p=x.split(":");MM[p[0]]=p[1].split(",")});
+function opts(a){return a.map(function(m){return '<option value="'+esc(m)+'">'}).join("")}
+$("#mkl").innerHTML=opts(Object.keys(MM));$("#trl").innerHTML=opts("Base,S,SE,SEL,SL,SV,LE,XLE,LX,EX,EX-L,Sport,Touring,Limited,Premium,Luxury,Platinum,SXT,GT,R/T,XLT,Lariat,Titanium,Denali,SLT,LT,LTZ,RS,Trend,Comfortline,Highline".split(","));
+document.addEventListener("input",function(e){if(e.target.name=="Make"){var v=e.target.value.trim().toLowerCase(),k=Object.keys(MM).filter(function(m){return m.toLowerCase()==v})[0];$("#mdl").innerHTML=k?opts(MM[k]):""}});
 /* ---- live inventory from the free database (set up in Stage 2b) ---- */
 var SB_URL="https://gaqjoqqbntzyzyhpbtke.supabase.co",SB_KEY="sb_publishable_2IejoHqbRSLXDG9qoZOjqQ_869noyFE";
 function loadCars(){
