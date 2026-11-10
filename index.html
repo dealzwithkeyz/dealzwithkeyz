@@ -130,7 +130,7 @@ footer{padding:48px 20px 100px}
 <h1 data-fr="Voitures à vendre">Cars for Sale</h1>
 <div class="note" id="samp" data-fr="Annonces d’exemple pour la démonstration. Le vrai inventaire sera ajouté par le propriétaire.">Demo listings for layout. The owner will add the real inventory.</div>
 <div class="note" data-fr="Certains véhicules sont vendus par l’entremise de concessionnaires partenaires; c’est indiqué sur chaque annonce. Pour ceux-là, le prix et la disponibilité sont confirmés avec le concessionnaire avant toute vente.">Some vehicles are sold through partner dealerships; this is shown on each listing. For those, price and availability are confirmed with the dealership before any sale.</div>
-<div class="tools"><input id="q" placeholder="Search / Rechercher"><select id="so"><option value="new" data-fr="Plus récent">Newest</option><option value="lo" data-fr="Prix croissant">Price: low to high</option><option value="hi" data-fr="Prix décroissant">Price: high to low</option></select></div>
+<div class="tools"><input id="q" list="sg" autocomplete="off" placeholder="Search / Rechercher"><select id="fmk"></select><select id="fmd"></select><datalist id="sg"></datalist><select id="so"><option value="new" data-fr="Plus récent">Newest</option><option value="lo" data-fr="Prix croissant">Price: low to high</option><option value="hi" data-fr="Prix décroissant">Price: high to low</option></select></div>
 <div class="grid" id="list"></div>
 <div class="note"><b data-fr="Acheteur en gros ?">Wholesale buyer?</b> <span data-fr="Le gros se fait sur demande seulement.">Wholesale is by application only.</span> <a href="#wholesale" data-fr="Faire une demande">Apply here</a> · <a href="mailto:dealzwithkeyz@gmail.com?subject=Wholesale%20inquiry" data-fr="ou écrivez-nous">or email us</a></div>
 </section>
@@ -187,6 +187,19 @@ var CFG={hours:{0:["10:00","20:00"],1:["10:00","20:00"],2:["10:00","20:00"],3:["
  dur:30,notice:4,ahead:21,
  blockedDates:[],                   // e.g. ["2026-12-25","2026-12-26"]
  blockedSlots:[]};                  // e.g. ["2026-11-14 14:00"]  (booked or unavailable)
+/* Extra closed days, generated through Dec 2030. Closed all day. Remove a letter from "off" to reopen that group.
+   "early" = closing time for the evening before group "a" days. */
+var CLOSE={off:["a","b","c","d","e"],early:"15:00"};
+var OFFD={
+ a:["2027-04-22","2027-04-23","2027-04-28","2027-04-29","2027-06-11","2027-06-12","2027-10-02","2027-10-03","2027-10-11","2027-10-16","2027-10-17","2027-10-23","2027-10-24","2028-04-11","2028-04-12","2028-04-17","2028-04-18","2028-05-31","2028-06-01","2028-09-21","2028-09-22","2028-09-30","2028-10-05","2028-10-06","2028-10-12","2028-10-13","2029-03-31","2029-04-01","2029-04-06","2029-04-07","2029-05-20","2029-05-21","2029-09-10","2029-09-11","2029-09-19","2029-09-24","2029-09-25","2029-10-01","2029-10-02","2030-04-18","2030-04-19","2030-04-24","2030-04-25","2030-06-07","2030-06-08","2030-09-28","2030-09-29","2030-10-07","2030-10-12","2030-10-13","2030-10-19","2030-10-20"],
+ b:["2027-04-24","2027-04-25","2027-04-26","2027-04-27","2027-10-18","2027-10-19","2027-10-20","2027-10-21","2027-10-22","2028-04-13","2028-04-14","2028-04-15","2028-04-16","2028-10-07","2028-10-08","2028-10-09","2028-10-10","2028-10-11","2029-04-02","2029-04-03","2029-04-04","2029-04-05","2029-09-26","2029-09-27","2029-09-28","2029-09-29","2029-09-30","2030-04-20","2030-04-21","2030-04-22","2030-04-23","2030-10-14","2030-10-15","2030-10-16","2030-10-17","2030-10-18"],
+ c:["2027-03-23","2028-03-12","2029-03-01","2030-03-19"],
+ d:["2026-12-05","2026-12-06","2026-12-07","2026-12-08","2026-12-09","2026-12-10","2026-12-11","2026-12-12","2027-12-25","2027-12-26","2027-12-27","2027-12-28","2027-12-29","2027-12-30","2027-12-31","2028-01-01","2028-12-13","2028-12-14","2028-12-15","2028-12-16","2028-12-17","2028-12-18","2028-12-19","2028-12-20","2029-12-02","2029-12-03","2029-12-04","2029-12-05","2029-12-06","2029-12-07","2029-12-08","2029-12-09","2030-12-21","2030-12-22","2030-12-23","2030-12-24","2030-12-25","2030-12-26","2030-12-27","2030-12-28"],
+ e:["2026-12-20","2027-03-22","2027-07-22","2027-08-12","2027-10-04","2028-01-09","2028-03-09","2028-07-11","2028-08-01","2028-09-24","2028-12-28","2029-02-28","2029-07-01","2029-07-22","2029-09-12","2029-12-16","2030-03-18","2030-07-18","2030-08-08","2030-09-30"],
+};
+var OFFSET={},EARLY={};
+CLOSE.off.forEach(function(k){(OFFD[k]||[]).forEach(function(d){OFFSET[d]=1})});
+if(CLOSE.off.indexOf("a")>-1)OFFD.a.forEach(function(d){var p=new Date(new Date(d+"T12:00:00Z").getTime()-864e5).toISOString().slice(0,10);if(OFFD.a.indexOf(p)<0)EARLY[p]=1});
 // Per car: add dl:"Dealership name" ONLY for cars sold through a partner dealership.
 // Leave dl out for other cars. When set, it shows on the card, in the details and in the inquiry email.
 // IMPORTANT: this file is public. NEVER add wholesale cars here; share wholesale lists privately with approved buyers.
@@ -262,14 +275,24 @@ function card(c){
  var s=c.st!="Available",mail=inq(c);
  return '<div class="card'+(s?" sold":"")+'" data-id="'+c.id+'" style="cursor:pointer">'+pic(c)+'<div class="b"><span class="tag">'+t(c.ty,c.ty=="Retail"?"Détail":"Gros")+"</span>"+(s?'<span class="tag">'+stl(c.st)+"</span>":"")+(c.dl?'<span class="tag">'+t("Via dealership","Via concessionnaire")+"</span>":"")+"<h3>"+c.y+" "+c.mk+" "+c.md+'</h3><div class="price">'+money(c.p)+'</div><div style="color:var(--mut);font-size:.88rem">'+km(c.km)+'</div><p><a class="btn s" href="'+mail+'">'+t("Inquire","Demander")+"</a></p></div></div>";
 }
+function uniq(a){return a.filter(function(v,i){return a.indexOf(v)==i}).sort()}
+function facets(){ // make/model lists come ONLY from cars actually in the inventory
+ var cs=CARS.filter(function(c){return c.ty!="Wholesale"}),mk=$("#fmk").value,mo=$("#fmd").value;
+ var mks=uniq(cs.map(function(c){return c.mk}));if(mks.indexOf(mk)<0)mk="";
+ var mos=uniq(cs.filter(function(c){return !mk||c.mk==mk}).map(function(c){return c.md}));if(mos.indexOf(mo)<0)mo="";
+ var o=function(a,all){return '<option value="">'+all+"</option>"+a.map(function(x){return "<option>"+esc(x)+"</option>"}).join("")};
+ $("#fmk").innerHTML=o(mks,t("All makes","Toutes les marques"));$("#fmk").value=mk;
+ $("#fmd").innerHTML=o(mos,t("All models","Tous les modèles"));$("#fmd").value=mo;
+ $("#sg").innerHTML=uniq(mks.concat(cs.map(function(c){return c.mk+" "+c.md}))).map(function(x){return '<option value="'+esc(x)+'">'}).join("")}
 function render(){
- var q=$("#q").value.toLowerCase(),s=$("#so").value;
- var r=CARS.filter(function(c){return (c.mk+" "+c.md).toLowerCase().indexOf(q)>-1&&c.ty!="Wholesale"});
+ facets();var q=$("#q").value.toLowerCase(),s=$("#so").value,fk=$("#fmk").value,fo=$("#fmd").value;
+ var r=CARS.filter(function(c){return (c.mk+" "+c.md).toLowerCase().indexOf(q)>-1&&c.ty!="Wholesale"&&(!fk||c.mk==fk)&&(!fo||c.md==fo)});
  r.sort(function(a,b){return s=="lo"?a.p-b.p:s=="hi"?b.p-a.p:b.y-a.y});
  $("#list").innerHTML=r.length?r.map(card).join(""):"<p>"+t("No matches.","Aucun résultat.")+"</p>";
  $("#q").placeholder=t("Search make or model","Rechercher marque ou modèle");
 }
 ["#q","#so"].forEach(function(s){$(s).addEventListener("input",render)});
+$("#fmk").addEventListener("change",function(){$("#fmd").value="";render()});$("#fmd").addEventListener("change",render);
 document.addEventListener("click",function(e){
  if(e.target.closest("a"))return;var el=e.target.closest("[data-id]");if(!el)return;
  var c=CARS.filter(function(x){return x.id==el.dataset.id})[0];
@@ -291,9 +314,10 @@ function key(m){return ("0"+Math.floor(m/60)).slice(-2)+":"+("0"+m%60).slice(-2)
 function slotsFor(d,now){
  var dt=new Date(d+"T12:00:00Z");
  var H=CFG.hours[dt.getUTCDay()];
- if(!H||CFG.blockedDates.indexOf(d)>-1)return[];
+ if(!H||CFG.blockedDates.indexOf(d)>-1||OFFSET[d])return[];
  var out=[];
- for(var m=hm(H[0]);m+CFG.dur<=hm(H[1]);m+=CFG.dur){
+ var end=hm(H[1]);if(EARLY[d])end=Math.min(end,hm(CLOSE.early));
+ for(var m=hm(H[0]);m+CFG.dur<=end;m+=CFG.dur){
   if(d==now.d&&m<now.m+CFG.notice*60)continue;
   if(CFG.blockedSlots.indexOf(d+" "+key(m))>-1)continue;
   out.push(m)}
